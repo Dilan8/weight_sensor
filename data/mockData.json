@@ -1,0 +1,22 @@
+[
+  {
+    "store_id": "Store001",
+    "shelf_id": "ShelfA1",
+    "product_id": "P1001",
+    "product_name": "Rice Bag - Prima",
+    "unit_weight_g": 5000,
+    "total_item_count": 100,
+    "max_item_count": 200,
+    "threshold_count": 80
+  },
+  {
+    "store_id": "Store002",
+    "shelf_id": "ShelfA2",
+    "product_id": "P1002",
+    "product_name": "Milk powder",
+    "unit_weight_g": 400,
+    "total_item_count": 1000,
+    "max_item_count": 2000,
+    "threshold_count":900
+  }
+]

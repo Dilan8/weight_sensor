@@ -1,0 +1,4 @@
+1. When product remove from shlef need to get item count and give the real time count and kg.
+2. When they adding product need to get the count and show the real time updated count and wegight.
+3. It's passed max weight need to give an alert.
+4. Also we need to make sure stock is with in threshod ex: item_count < threshod_count --> Alert 
