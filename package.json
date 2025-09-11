@@ -1,0 +1,16 @@
+{
+  "name": "sit729_sensor",
+  "version": "1.0.0",
+  "description": "weight sensor",
+  "main": "weightSensor.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node weightSensor.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "mongodb": "^6.19.0",
+    "mqtt": "^5.14.1"
+  }
+}

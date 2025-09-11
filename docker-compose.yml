@@ -1,0 +1,43 @@
+version: "3.8"
+
+networks:
+  sensor-net:
+
+services:
+  mqtt-broker:
+    image: eclipse-mosquitto
+    container_name: mqtt-broker
+    ports:
+      - "1883:1883"
+    networks:
+      - sensor-net
+    volumes:
+     - ./config:/mosquitto/config
+    healthcheck:
+      test: ["CMD", "mosquitto_sub", "-h", "localhost", "-t", "test", "-C", "1"]
+      interval: 5s
+      retries: 5
+
+  node-red:
+    image: nodered/node-red
+    container_name: node-red
+    ports:
+      - "1880:1880"
+    depends_on:
+      - mqtt-broker
+    networks:
+      - sensor-net
+    restart: unless-stopped
+    environment:
+      - MQTT_BROKER=mqtt-broker
+
+  weight-sensor:
+    build: .
+    container_name: weight-sensor
+    depends_on:
+      - mqtt-broker
+    networks:
+      - sensor-net
+    environment:
+     - MQTT_BROKER=mqtt://mqtt-broker:1883
+
