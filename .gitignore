@@ -137,3 +137,50 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Local Terraform state
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+
+# Terraform working directory
+.terraform/
+.terraform.lock.hcl
+
+# Variable files with secrets
+*.auto.tfvars
+*.auto.tfvars.json
+secrets.tfvars
+terraform.tfvars
+# Local Terraform state
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+
+# Terraform working directory
+.terraform/
+.terraform.lock.hcl
+
+# Variable files with secrets
+*.auto.tfvars
+*.auto.tfvars.json
+secrets.tfvars
+terraform.tfvars
+
+# Local Terraform state
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+
+# Terraform working directory
+.terraform/
+.terraform.lock.hcl
+
+# Variable files with secrets
+*.auto.tfvars
+*.auto.tfvars.json
+secrets.tfvars
+
