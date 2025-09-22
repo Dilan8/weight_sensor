@@ -16,8 +16,8 @@ phases:
 
   build:
     commands:
-      - echo Building Node.js Docker image
-      - docker build -t $NODEJS_ECR_URL:$IMAGE_TAG .
+      - echo Building Node.js Docker image for x86_64
+      - docker build --platform linux/amd64 -t $NODEJS_ECR_URL:$IMAGE_TAG .
       - docker tag $NODEJS_ECR_URL:$IMAGE_TAG $NODEJS_ECR_URL:latest
 
   post_build:
