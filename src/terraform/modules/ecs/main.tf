@@ -116,16 +116,31 @@ resource "aws_ecs_task_definition" "nodejs_app" {
   execution_role_arn       = aws_iam_role.ecs_task_execution.arn
 
   container_definitions = jsonencode([{
-    name      = "nodejs-app"
-    image     = var.nodejs_app_ecr_url
-    cpu       = 256
-    memory    = 512
-    essential = true
-    portMappings = [{
-      containerPort = 3000
-      protocol      = "tcp"
-    }]
-  }])
+  name      = "nodejs-app"
+  image     = var.nodejs_app_ecr_url
+  cpu       = 256
+  memory    = 512
+  essential = true
+  portMappings = [{
+    containerPort = 3000
+    protocol      = "tcp"
+  }]
+  environment = [
+    {
+      name  = "MQTT_BROKER"
+      value = "tcp://mqtt-service:1883"
+    }
+  ]
+  logConfiguration = {
+    logDriver = "awslogs"
+    options = {
+      "awslogs-group"         = "/ecs/nodejs-app-test"
+      "awslogs-region"        = "ap-southeast-2"
+      "awslogs-stream-prefix" = "nodejs-app"
+    }
+  }
+}])
+
 }
 
 # ==============================
