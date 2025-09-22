@@ -1,0 +1,38 @@
+version: 0.2
+
+env:
+  variables:
+    AWS_REGION: "ap-southeast-2"
+    NODEJS_ECR_URL: "003380495206.dkr.ecr.ap-southeast-2.amazonaws.com/nodejs-app"
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 20
+    commands:
+      - echo Installing npm dependencies
+      - npm install
+
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR
+      - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $NODEJS_ECR_URL
+      - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+
+  build:
+    commands:
+      - echo Building Node.js Docker image
+      - docker build -t $NODEJS_ECR_URL:$IMAGE_TAG ./nodejs-app
+      - docker tag $NODEJS_ECR_URL:$IMAGE_TAG $NODEJS_ECR_URL:latest
+
+  post_build:
+    commands:
+      - echo Pushing Docker image to ECR
+      - docker push $NODEJS_ECR_URL:$IMAGE_TAG
+      - docker push $NODEJS_ECR_URL:latest
+      - echo Writing imagedefinitions.json for ECS
+      - printf '[{"name":"nodejs-app","imageUri":"%s"}]' $NODEJS_ECR_URL:$IMAGE_TAG > imagedefinitions.json
+
+artifacts:
+  files:
+    - imagedefinitions.json

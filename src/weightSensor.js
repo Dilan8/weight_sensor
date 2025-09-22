@@ -3,7 +3,6 @@ const fs = require("fs");
 const connectDB = require("../config/mongoDb"); // MongoDB connection
 const brokerUrl = process.env.MQTT_BROKER || "mqtt://localhost:1883";
 
-
 // MQTT connection
 const client = mqtt.connect(brokerUrl); // change to localhost if testing locally
 
@@ -15,8 +14,6 @@ let shelfCollection;
 connectDB().then(db => {
   shelfCollection = db.collection("shelfEvents");
 });
-
-
 
 // Save/update shelf event to MongoDB
 async function saveEventToMongo(eventPayload) {
@@ -33,11 +30,19 @@ async function saveEventToMongo(eventPayload) {
   }
 }
 
+// Function to determine stock type
+function getStockType(shelf) {
+  if (shelf.total_item_count < shelf.threshold_count) return "Low Stock";
+  if (shelf.total_item_count >= shelf.max_item_count) return "Max Capacity";
+  return "Normal Stock";
+}
+
 // Add items to shelf
 function addItem(shelf, count = 1) {
   shelf.total_item_count = Math.min(shelf.max_item_count, shelf.total_item_count + count);
   shelf.last_action = "added";
   shelf.last_count = count;
+  shelf.stock_type = getStockType(shelf);
 
   console.log(`✅ Added ${count} item(s) to ${shelf.shelf_id}. New count: ${shelf.total_item_count}`);
   checkAlerts(shelf);
@@ -48,6 +53,7 @@ function removeItem(shelf, count = 1) {
   shelf.total_item_count = Math.max(0, shelf.total_item_count - count);
   shelf.last_action = "removed";
   shelf.last_count = count;
+  shelf.stock_type = getStockType(shelf);
 
   console.log(`⚠️ Removed ${count} item(s) from ${shelf.shelf_id}. New count: ${shelf.total_item_count}`);
   checkAlerts(shelf);
@@ -55,10 +61,9 @@ function removeItem(shelf, count = 1) {
 
 // Check for low stock or max capacity alerts
 function checkAlerts(shelf) {
-  // Low Stock Alert
-  if (shelf.total_item_count < shelf.threshold_count) {
+  if (shelf.stock_type === "Low Stock" || shelf.stock_type === "Max Capacity") {
     const alertMsg = {
-      type: "Low Stock",
+      type: shelf.stock_type,
       store_id: shelf.store_id,
       shelf_id: shelf.shelf_id,
       product_name: shelf.product_name,
@@ -67,23 +72,7 @@ function checkAlerts(shelf) {
       last_count: shelf.last_count,
       timestamp: new Date().toISOString()
     };
-    console.log("⚠️ Low Stock Alert:", JSON.stringify(alertMsg, null, 2));
-    client.publish("supermarket/alerts", JSON.stringify(alertMsg));
-  }
-
-  // Max Capacity Alert
-  if (shelf.total_item_count >= shelf.max_item_count) {
-    const alertMsg = {
-      type: "Max Capacity",
-      store_id: shelf.store_id,
-      shelf_id: shelf.shelf_id,
-      product_name: shelf.product_name,
-      current_count: shelf.total_item_count,
-      last_action: shelf.last_action,
-      last_count: shelf.last_count,
-      timestamp: new Date().toISOString()
-    };
-    console.log("⚠️ Capacity Alert:", JSON.stringify(alertMsg, null, 2));
+    console.log(`⚠️ ${shelf.stock_type} Alert:`, JSON.stringify(alertMsg, null, 2));
     client.publish("supermarket/alerts", JSON.stringify(alertMsg));
   }
 }
@@ -99,6 +88,7 @@ function publishShelves() {
     new_weight_kg: (shelf.total_item_count * shelf.unit_weight_g) / 1000,
     last_action: shelf.last_action || null,
     last_count: shelf.last_count || 0,
+    stock_type: shelf.stock_type || "Normal Stock",
     timestamp: new Date().toISOString()
   }));
 
@@ -122,4 +112,4 @@ function simulateShelves() {
 }
 
 // Start simulation every 5 seconds
-setInterval(simulateShelves, 5000);
+setInterval(simulateShelves, 10000);

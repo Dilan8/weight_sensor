@@ -1,7 +1,7 @@
 // db.js
 const { MongoClient } = require("mongodb");
 
-const uri = "mongodb+srv://vasandarajdilan64:DjNe4Ji5kLLDNos4@sensor1.i1lcqso.mongodb.net/?retryWrites=true&w=majority&appName=sensor1"; // replace with your connection string
+const uri = "mongodb+srv://varniah26_db_user:hyGDWENMrC2YKSHN@supermarket.jkfvm3z.mongodb.net/?retryWrites=true&w=majority&appName=supermarket"
 const client = new MongoClient(uri, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
