@@ -11,5 +11,8 @@ RUN npm install
 # Copy all source files
 COPY . .
 
+# Copy the DocumentDB CA certificate
+COPY global-bundle.pem .
+
 # Run the Node.js script
 CMD ["node", "src/weightSensor.js"]
