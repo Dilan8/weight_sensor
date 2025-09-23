@@ -1,27 +1,14 @@
 // mongoDb.js
 const { MongoClient } = require("mongodb");
 
-// Replace the hosts below with your actual shard hostnames from Atlas
-const hosts = [
-  "ac-solayw0-shard-00-00.jkfvm3z.mongodb.net:27017",
-  "ac-solayw0-shard-00-01.jkfvm3z.mongodb.net:27017",
-  "ac-solayw0-shard-00-02.jkfvm3z.mongodb.net:27017"
-];
-
-const username = "varniah26_db_user";
-const password = "hyGDWENMrC2YKSHN";
 const dbName = "supermarket";
-const replicaSet = "atlas-8c75aw-shard-0";
+const uri = process.env.MONGO_URI || "mongodb://localhost:27017/supermarket"; // local fallback
 
-// Construct URI using all hosts
-const uri = `mongodb://${username}:${password}@${hosts.join(",")}/?replicaSet=${replicaSet}&authSource=admin&retryWrites=true&w=majority`;
-
-// MongoClient options
 const client = new MongoClient(uri, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
-  tls: true, // ensure TLS is used
-  tlsAllowInvalidCertificates: false // set true only for local testing if needed
+  tls: uri.includes("docdb.amazonaws.com") || uri.includes("mongodb+srv"), // enable TLS for DocumentDB or Atlas
+  tlsAllowInvalidCertificates: true, // for DocumentDB self-signed cert
 });
 
 let dbInstance;
@@ -30,10 +17,10 @@ async function connectDB() {
   if (!dbInstance) {
     try {
       await client.connect();
-      console.log("✅ Connected to MongoDB");
+      console.log("✅ Connected to MongoDB/DocumentDB");
       dbInstance = client.db(dbName);
     } catch (err) {
-      console.error("❌ MongoDB Connection Error:", err);
+      console.error("❌ MongoDB/DocumentDB Connection Error:", err);
       throw err;
     }
   }
