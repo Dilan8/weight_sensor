@@ -2,7 +2,7 @@
 const { MongoClient } = require("mongodb");
 
 const dbName = "supermarket";
-const uri = process.env.MONGO_URI || "mongodb://docdb_user:DocdbPass123@sensor-docdb-cluster.cluster-czueamasy3z1.ap-southeast-2.docdb.amazonaws.com:27017/?tls=true&tlsCAFile=global-bundle.pem&replicaSet=rs0&readPreference=secondaryPreferred&retryWrites=false"; // local fallback
+const uri = process.env.MONGO_URI || "mongodb://docdb_user:DocdbPass123@sensor-docdb-cluster.cluster-czueamasy3z1.ap-southeast-2.docdb.amazonaws.com:27017/supermarket?authMechanism=SCRAM-SHA-1&tls=true&tlsCAFile=global-bundle.pem&retryWrites=false";
 
 const client = new MongoClient(uri, {
   useNewUrlParser: true,
