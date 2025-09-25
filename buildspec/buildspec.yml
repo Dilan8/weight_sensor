@@ -26,7 +26,7 @@ phases:
       - docker push $NODEJS_ECR_URL:$IMAGE_TAG
       - docker push $NODEJS_ECR_URL:latest
       - echo Writing imagedefinitions.json for ECS
-      - printf '[{"name":"nodejs-app","imageUri":"%s"}]' $NODEJS_ECR_URL:$IMAGE_TAG > imagedefinitions.json
+      - printf '[{"name":"nodejs-app","imageUri":"%s"}]' $NODEJS_ECR_URL:latest > imagedefinitions.json
 
 artifacts:
   files:
