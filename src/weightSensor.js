@@ -1,7 +1,7 @@
 const mqtt = require("mqtt");
 const fs = require("fs");
 const connectDB = require("../config/mongoDb"); // MongoDB connection
-const brokerUrl = process.env.MQTT_BROKER || "mqtt://localhost:1883";
+const brokerUrl = process.env.MQTT_BROKER || "tcp://mqtt-service:1883";
 
 // MQTT connection
 const client = mqtt.connect(brokerUrl); // change to localhost if testing locally
