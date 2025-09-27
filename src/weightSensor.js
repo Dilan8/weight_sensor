@@ -6,13 +6,37 @@ const connectDB = require("../config/mongoDb"); // MongoDB connection
 const brokerUrl = process.env.MQTT_BROKER || "tcp://mqtt-nlb-one-6bf69bc797ab88fb.elb.ap-southeast-2.amazonaws.com:1883";
 
 console.log(">>>>>>>>>>>>>>>>>>>>",brokerUrl)
+// MQTT connection
+const client = mqtt.connect(brokerUrl);
+
+// ✅ Successfully connected
+client.on('connect', () => {
+  console.log("✅ MQTT Connected!");
+});
+
+// ❌ Connection error handler
+client.on('error', (err) => {
+  console.error("❌ MQTT Connection Error:", err.message);
+  // Optional: attempt reconnection after a delay
+  setTimeout(() => {
+    console.log("🔄 Retrying MQTT connection...");
+    client.reconnect();
+  }, 5000);
+});
+
+// ⚠️ Handle offline events (when broker is unreachable)
+client.on('offline', () => {
+  console.warn("⚠️ MQTT Client is offline. Check broker or network.");
+});
+
+// ⚠️ Handle unexpected close events
+client.on('close', () => {
+  console.warn("⚠️ MQTT Connection closed unexpectedly.");
+});
 
 app.get("/health", (req, res) => res.send("OK"));
 app.listen(3000, () => console.log("Node.js HTTP server running on port 3000"));
 
-// MQTT connection
-const client = mqtt.connect(brokerUrl); // change to localhost if testing locally
-client.on('connect', () => console.log("MQTT Connected!"));
 // Load mock shelf data
 let shelves = JSON.parse(fs.readFileSync("./data/mockData.json", "utf8"));
 let shelfCollection;

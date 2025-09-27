@@ -117,14 +117,6 @@ resource "aws_ecs_task_definition" "mqtt" {
   memory                   = "512"
   execution_role_arn       = aws_iam_role.ecs_task_execution.arn
 
-  volume {
-    name = "mosquitto-config"
-    efs_volume_configuration {
-      file_system_id     = aws_efs_file_system.mosquitto.id
-      transit_encryption = "ENABLED"
-    }
-  }
-
   container_definitions = jsonencode([{
     name      = "mqtt"
     image     = "eclipse-mosquitto:2.0.22"
@@ -135,11 +127,7 @@ resource "aws_ecs_task_definition" "mqtt" {
       containerPort = 1883
       protocol      = "tcp"
     }]
-    mountPoints = [{
-      sourceVolume  = "mosquitto-config"
-      containerPath = "/mosquitto/config"
-      readOnly      = false
-    }]
+    
     logConfiguration = {
       logDriver = "awslogs"
       options = {
