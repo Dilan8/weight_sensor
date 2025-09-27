@@ -1,11 +1,18 @@
+const express = require("express");
+const app = express(); 
 const mqtt = require("mqtt");
 const fs = require("fs");
 const connectDB = require("../config/mongoDb"); // MongoDB connection
-const brokerUrl = process.env.MQTT_BROKER || "tcp://mqtt-service:1883";
+const brokerUrl = process.env.MQTT_BROKER || "tcp://mqtt-nlb-one-6bf69bc797ab88fb.elb.ap-southeast-2.amazonaws.com:1883";
+
+console.log(">>>>>>>>>>>>>>>>>>>>",brokerUrl)
+
+app.get("/health", (req, res) => res.send("OK"));
+app.listen(3000, () => console.log("Node.js HTTP server running on port 3000"));
 
 // MQTT connection
 const client = mqtt.connect(brokerUrl); // change to localhost if testing locally
-
+client.on('connect', () => console.log("MQTT Connected!"));
 // Load mock shelf data
 let shelves = JSON.parse(fs.readFileSync("./data/mockData.json", "utf8"));
 let shelfCollection;
