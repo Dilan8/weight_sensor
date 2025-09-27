@@ -96,3 +96,18 @@ variable "buildspec_path" {
   type    = string
   default = "buildspec.yml"
 }
+
+variable "documentdb_cluster_name" {
+  description = "DocumentDB cluster name"
+  default     = "sensor-docdb-cluster"
+}
+
+variable "documentdb_username" {
+  description = "DocumentDB master username"
+  default     = "docdb_user"
+}
+
+variable "documentdb_password" {
+  description = "DocumentDB master password"
+  default     = "DocdbPass123!"  # Use sensitive method for prod
+}

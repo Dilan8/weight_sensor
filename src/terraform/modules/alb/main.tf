@@ -2,15 +2,15 @@
 # Security Group for ALB
 # ==============================
 resource "aws_security_group" "alb_sg" {
-  name        = "alb-sg"
-  description = "ALB security group"
+  name        = "alb-sg-one"
+  description = "Allow HTTP traffic to ALB"
   vpc_id      = var.vpc_id
 
   ingress {
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["0.0.0.0/0"] # open to internet
   }
 
   egress {
@@ -22,20 +22,29 @@ resource "aws_security_group" "alb_sg" {
 }
 
 # ==============================
-# Application Load Balancer
+# Application Load Balancer (ALB)
 # ==============================
-resource "aws_lb" "main" {
-  name               = "ecs-alb"
+resource "aws_lb" "alb" {
+  name               = "ecs-alb-one"
   load_balancer_type = "application"
   subnets            = var.subnets
   security_groups    = [aws_security_group.alb_sg.id]
 }
 
 # ==============================
-# Target Groups (IP target type for Fargate)
+# Network Load Balancer (NLB) for MQTT
+# ==============================
+resource "aws_lb" "nlb" {
+  name               = "mqtt-nlb-one"
+  load_balancer_type = "network"
+  subnets            = var.subnets
+}
+
+# ==============================
+# Target Groups
 # ==============================
 resource "aws_lb_target_group" "nodered_tg" {
-  name        = "nodered-tg"
+  name        = "nodered-tg-one"
   port        = 1880
   protocol    = "HTTP"
   vpc_id      = var.vpc_id
@@ -43,18 +52,44 @@ resource "aws_lb_target_group" "nodered_tg" {
 }
 
 resource "aws_lb_target_group" "nodejs_app_tg" {
-  name        = "nodejs-app-tg"
+  name        = "nodejs-app-tg-one"
   port        = 3000
   protocol    = "HTTP"
   vpc_id      = var.vpc_id
   target_type = "ip"
+
+    health_check {
+    protocol            = "HTTP"
+    path                = "/health"
+    interval            = 30
+    timeout             = 5
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
+    matcher             = "200"
+  }
+}
+
+resource "aws_lb_target_group" "mqtt_tg" {
+  name        = "mqtt-tg-one"
+  port        = 1883
+  protocol    = "TCP"
+  vpc_id      = var.vpc_id
+  target_type = "ip"
+
+  health_check {
+    protocol            = "TCP"
+    healthy_threshold   = 3
+    unhealthy_threshold = 2
+    timeout             = 10
+    interval            = 30
+  }
 }
 
 # ==============================
-# ALB Listener
+# ALB Listener (HTTP)
 # ==============================
 resource "aws_lb_listener" "http_listener" {
-  load_balancer_arn = aws_lb.main.arn
+  load_balancer_arn = aws_lb.alb.arn
   port              = 80
   protocol          = "HTTP"
 
@@ -69,7 +104,7 @@ resource "aws_lb_listener" "http_listener" {
 }
 
 # ==============================
-# Listener Rules
+# ALB Listener Rules
 # ==============================
 resource "aws_lb_listener_rule" "nodered_rule" {
   listener_arn = aws_lb_listener.http_listener.arn
@@ -82,7 +117,7 @@ resource "aws_lb_listener_rule" "nodered_rule" {
 
   condition {
     path_pattern {
-      values = ["/nodered*"]
+      values = ["/*"]
     }
   }
 }
@@ -98,8 +133,21 @@ resource "aws_lb_listener_rule" "nodejs_rule" {
 
   condition {
     path_pattern {
-      values = ["/app*"]
+      values = ["/"]
     }
   }
 }
 
+# ==============================
+# NLB Listener (TCP for MQTT)
+# ==============================
+resource "aws_lb_listener" "mqtt_listener" {
+  load_balancer_arn = aws_lb.nlb.arn
+  port              = 1883
+  protocol          = "TCP"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.mqtt_tg.arn
+  }
+}

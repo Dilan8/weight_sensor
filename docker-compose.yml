@@ -12,7 +12,7 @@ services:
     networks:
       - sensor-net
     volumes:
-     - ./config:/mosquitto/config
+      - ./config:/mosquitto/config
     healthcheck:
       test: ["CMD", "mosquitto_sub", "-h", "localhost", "-t", "test", "-C", "1"]
       interval: 5s
@@ -31,13 +31,26 @@ services:
     environment:
       - MQTT_BROKER=mqtt-broker
 
+  mongodb:
+    image: mongo:6
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    networks:
+      - sensor-net
+    volumes:
+      - ./data/db:/data/db
+    environment:
+      MONGO_INITDB_DATABASE: supermarket
+
   weight-sensor:
     build: .
     container_name: weight-sensor
     depends_on:
       - mqtt-broker
+      - mongodb
     networks:
       - sensor-net
     environment:
-     - MQTT_BROKER=mqtt://mqtt-broker:1883
-
+      - MQTT_BROKER=mqtt://mqtt-broker:1883
+      - MONGO_URI=mongodb://mongodb:27017/supermarket

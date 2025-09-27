@@ -18,6 +18,11 @@ variable "nodered_tg_arn" {
   type = string
 }
 
+
+variable "mqtt_tg_arn" {
+  type = string
+}
+
 variable "nodejs_app_tg_arn" {
   type = string
 }
