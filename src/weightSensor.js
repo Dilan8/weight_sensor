@@ -3,9 +3,9 @@ const app = express();
 const mqtt = require("mqtt");
 const fs = require("fs");
 const connectDB = require("../config/mongoDb"); // MongoDB connection
-const brokerUrl = process.env.MQTT_BROKER || "tcp://mqtt-nlb-one-6bf69bc797ab88fb.elb.ap-southeast-2.amazonaws.com:1883";
+const brokerUrl = process.env.MQTT_BROKER || "mqtt://localhost:1883";
 
-console.log(">>>>>>>>>>>>>>>>>>>>",brokerUrl)
+
 // MQTT connection
 const client = mqtt.connect(brokerUrl);
 
