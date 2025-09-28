@@ -65,17 +65,17 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution_policy" {
 # ==============================
 # EFS for Mosquitto Config
 # ==============================
-resource "aws_efs_file_system" "mosquitto" {
-  creation_token = "mosquitto-config"
-}
+# resource "aws_efs_file_system" "mosquitto" {
+#   creation_token = "mosquitto-config"
+# }
 
-resource "aws_efs_mount_target" "mosquitto" {
-  for_each = toset(var.subnets)
+# resource "aws_efs_mount_target" "mosquitto" {
+#   for_each = toset(var.subnets)
 
-  file_system_id  = aws_efs_file_system.mosquitto.id
-  subnet_id       = each.value
-  security_groups = [aws_security_group.ecs_sg.id]
-}
+#   file_system_id  = aws_efs_file_system.mosquitto.id
+#   subnet_id       = each.value
+#   security_groups = [aws_security_group.ecs_sg.id]
+# }
 
 # ==============================
 # ECS Task Definitions (Fargate)
@@ -160,7 +160,7 @@ resource "aws_ecs_task_definition" "nodejs_app" {
     environment = [
       {
         name  = "MQTT_BROKER"
-        value = "tcp://mqtt-nlb-one-6bf69bc797ab88fb.elb.ap-southeast-2.amazonaws.com:1883"
+        value = "tcp://mqtt-nlb-one-dd1c623670a50dd1.elb.ap-southeast-2.amazonaws.com:1883"
       },
       {
         name  = "MONGO_URI"
